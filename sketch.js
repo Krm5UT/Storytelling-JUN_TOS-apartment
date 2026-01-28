@@ -1,5 +1,18 @@
+let ATA;
+
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight);
+  ATA = select('#ATA');
+  
+  ATA.mouseOver(() => {
+    ATA.style('color', '#1a04a8'); // Change to a bright color on hover
+    ATA.style('font-size', '10vh'); // Increase font size on hover
+  });
+
+  ATA.mouseOut(() => {
+    ATA.style('color', '#ffffff'); // Revert to original color
+    ATA.style('font-size', '8vh'); // Revert to original font size
+  });
 }
 
 function windowResized() {
@@ -48,6 +61,7 @@ function draw() {
   
   // Draw "ENTER" text above doors
   fill('#000');
+  textFont('Serif');
   noStroke();
   textAlign(CENTER, CENTER);
   textSize(48);
