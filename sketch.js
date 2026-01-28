@@ -1,11 +1,13 @@
 let ATA;
+let windows = []; // Store window data
+let hoveredWindow = null; // Track which window is hovered
 
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight);
   ATA = select('#ATA');
   
   ATA.mouseOver(() => {
-    ATA.style('color', '#1a04a8'); // Change to a bright color on hover
+    ATA.style('color', '#7F8CA6'); // Change to a bright color on hover
     ATA.style('font-size', '10vh'); // Increase font size on hover
   });
 
@@ -22,38 +24,42 @@ function windowResized() {
 function draw() {
   background('#9DA7BB'); // Light blue-gray background
   
-  // Draw 3 window rectangles with spacing
-  let windowWidth = 123;
-  let windowHeight = 180;
+  //---------------------------- Draw 3 windows rectangles with spacing
+  let windowWidth = 150;
+  let windowHeight = 200;
   let spacing = 100; // Space between windows
   let totalWindowWidth = windowWidth * 3 + spacing * 2; // Total width of all windows
   let startX = (width - totalWindowWidth) / 2; // Center windows horizontally
-  let startY = height * 0.2; // 20% from top
+  let startY = height * 0.13; // 20% from top
+  
+  // Update windows array
+  windows = [
+    { x: startX, y: startY, w: windowWidth, h: windowHeight, id: 0 },
+    { x: startX + windowWidth + spacing, y: startY, w: windowWidth, h: windowHeight, id: 1 },
+    { x: startX + 2 * (windowWidth + spacing), y: startY, w: windowWidth, h: windowHeight, id: 2 }
+  ];
+  
+  // Check for hover
+  hoveredWindow = null;
+  for (let win of windows) {
+    if (mouseX > win.x && mouseX < win.x + win.w && mouseY > win.y && mouseY < win.y + win.h) {
+      hoveredWindow = win.id;
+      break;
+    }
+  }
   
   // Window styling
   noStroke
-  fill('#d4dae4'); // off white window color
+  fill('#f7faff'); // off white window color
   
-  // Draw window 1
-  rect(startX, startY, windowWidth, windowHeight);
-  
-  // Draw window 2
-  rect(startX + windowWidth + spacing, startY, windowWidth, windowHeight);
-  
-  // Draw window 3
-  rect(startX + 2 * (windowWidth + spacing), startY, windowWidth, windowHeight);
-
-  // Add inward shadows to windows
+  // Draw windows
   noStroke();
-  noFill();
-  // Shadow for window 1
-  rect(startX + 5, startY + 5, windowWidth - 10, windowHeight - 10);
-  // Shadow for window 2
-  rect(startX + windowWidth + spacing + 5, startY + 5, windowWidth - 10, windowHeight - 10);
-  // Shadow for window 3
-  rect(startX + 2 * (windowWidth + spacing) + 5, startY + 5, windowWidth - 10, windowHeight - 10);
+  for (let win of windows) {
+    fill(hoveredWindow === win.id ? '#E8F0FF' : '#f7faff'); // Lighter on hover
+    rect(win.x, win.y, win.w, win.h);
+  }
 
-  // Draw double doors
+  //---------------------------- Draw double doors
   let doorWidth = 280;
   let doorHeight = 200;
   let doorX = (width - doorWidth) / 2; // Center the door horizontally
@@ -92,4 +98,11 @@ function draw() {
   noStroke();
   rect(doorX + doorWidth / 3, doorY + doorHeight / 2, 12, 3); // Left door handle
   rect(doorX + 3 * doorWidth / 5, doorY + doorHeight / 2, 12, 3); // Right door handle
+}
+
+function mousePressed() {
+  if (hoveredWindow !== null) {
+    console.log('Window ' + (hoveredWindow + 1) + ' clicked');
+    // Add your window interaction logic here
+  }
 }
