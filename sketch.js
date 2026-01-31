@@ -1,6 +1,15 @@
 let ATA;
 let windows = []; // Store window data
 let hoveredWindow = null; // Track which window is hovered
+let door = {
+  w: 280,
+  h: 200,
+  x: 0,
+  y: 0,
+  openProgress: 0, // 0 closed, 1 open
+  openTarget: 0,
+  isOpen: false
+};
 
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight);
@@ -55,62 +64,74 @@ function draw() {
   // Draw windows
   noStroke();
   for (let win of windows) {
-    fill(hoveredWindow === win.id ? '#FFF6E8' : '#f7faff'); // Lighter on hover
+    fill(hoveredWindow === win.id ? '#fff2b6' : '#f7faff'); // Lighter on hover
     rect(win.x, win.y, win.w, win.h);
   }
 
-  //---------------------------- Draw double doors
-  let doorWidth = 280;
-  let doorHeight = 200;
-  let doorX = (width - doorWidth) / 2; // Center the door horizontally
-  let doorY = height * 0.58; // 58% from top
-  
-  // Draw "ENTER" text above doors
-  fill('#000');
-  textFont('Serif');
+  //Draw background of double doors to cover gaps when open
   noStroke();
-  textAlign(CENTER, CENTER);
-  textSize(48);
-  text('ENTER', width / 2, doorY - 60);
+  fill('#343e50');
+  rect(door.x, door.y, door.w, door.h);
+
+  //---------------------------- Draw double doors (animated)
+  door.w = 280;
+  door.h = 200;
+  door.x = (width - door.w) / 2; // Center the door horizontally
+  door.y = height * 0.58; // 58% from top
+
+  // animate open/close
+  door.openProgress = lerp(door.openProgress, door.openTarget, 0.18);
+  if (abs(door.openProgress - door.openTarget) < 0.01) {
+    door.openProgress = door.openTarget;
+    door.isOpen = door.openTarget === 1;
+  }
+  // open on hover
+  let doorHover = mouseX > door.x && mouseX < door.x + door.w && mouseY > door.y && mouseY < door.y + door.h;
+  door.openTarget = doorHover ? 1 : 0;
+  if (doorHover) cursor('pointer'); else cursor('default');
   
   // Door styling
   stroke('#1E1E1E'); // black outline
   strokeWeight(2);
   fill('#7F8CA6'); // grey-blueish color for door
-  
-  // Draw left door
-  rect(doorX, doorY, doorWidth / 2, doorHeight);
-  
-  // Draw right door
-  rect(doorX + doorWidth / 2, doorY, doorWidth / 2, doorHeight);
 
-  // Add inward shadows to doors
+  // sliding amount: each door half slides outward by half-width
+  let halfW = door.w / 2;
+  let slide = door.openProgress * (halfW);
+
+  // Draw left door (slides left)
+  rect(door.x - slide, door.y, halfW, door.h);
+
+  // Draw right door (slides right)
+  rect(door.x + halfW + slide, door.y, halfW, door.h);
+
+  // Add inward shadows to doors (slightly inset)
   stroke('#3D3D3D'); // Darker shadow color
   strokeWeight(3);
   noFill();
-  // Shadow for left door
-  rect(doorX + 8, doorY + 8, doorWidth / 2 - 16, doorHeight - 16);
-  // Shadow for right door
-  rect(doorX + doorWidth / 2 + 8, doorY + 8, doorWidth / 2 - 16, doorHeight - 16);
-  
-  // Draw door handles (knobs)
-  fill('#1E1E1E'); // Gold color
+  rect(door.x - slide + 8, door.y + 8, halfW - 16, door.h - 16);
+  rect(door.x + halfW + slide + 8, door.y + 8, halfW - 16, door.h - 16);
+
+  // Draw door handles (knobs) that move with doors
+  fill('#1E1E1E');
   noStroke();
-  rect(doorX + doorWidth / 3, doorY + doorHeight / 2, 12, 3); // Left door handle
-  rect(doorX + 3 * doorWidth / 5, doorY + doorHeight / 2, 12, 3); // Right door handle
+  rect(door.x - slide + halfW / 3, door.y + door.h / 2, 12, 3); // Left door handle
+  rect(door.x + halfW + slide + (3 * halfW) / 5, door.y + door.h / 2, 12, 3); // Right door handle
+
 }
 
 function mousePressed() {
-  // Check if door is clicked
-  let doorWidth = 280;
-  let doorHeight = 200;
-  let doorX = (width - doorWidth) / 2;
-  let doorY = height * 0.58;
-  
-  if (mouseX > doorX && mouseX < doorX + doorWidth && mouseY > doorY && mouseY < doorY + doorHeight) {
-    window.location.href = 'html/windows.html';
+  // Check if door is clicked (toggle open and navigate after open)
+  if (mouseX > door.x && mouseX < door.x + door.w && mouseY > door.y && mouseY < door.y + door.h) {
+    // only navigate when doors are open and user clicks
+    if (door.isOpen) {
+      window.location.href = 'html/windows.html';
+      return;
+    }
+    // if not open, ignore click (hover opens them)
+    return;
   }
-  
+
   if (hoveredWindow !== null) {
     console.log('Window ' + (hoveredWindow + 1) + ' clicked');
     // Add your window interaction logic here
