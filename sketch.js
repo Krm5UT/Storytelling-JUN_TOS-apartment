@@ -1,4 +1,4 @@
-let ATA;
+let JNTS;
 let windows = []; // Store window data
 let hoveredWindow = null; // Track which window is hovered
 let door = {
@@ -13,16 +13,16 @@ let door = {
 
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight);
-  ATA = select('#ATA');
+  JNTS = select('#JNTS');
   
-  ATA.mouseOver(() => {
-    ATA.style('color', '#7F8CA6'); // Change to a bright color on hover
-    ATA.style('font-size', '10vh'); // Increase font size on hover
+  JNTS.mouseOver(() => {
+    JNTS.style('color', '#7F8CA6'); // Change to a bright color on hover
+    JNTS.style('font-size', '10vh'); // Increase font size on hover
   });
 
-  ATA.mouseOut(() => {
-    ATA.style('color', '#ffffff'); // Revert to original color
-    ATA.style('font-size', '8vh'); // Revert to original font size
+  JNTS.mouseOut(() => {
+    JNTS.style('color', '#ffffff'); // Revert to original color
+    JNTS.style('font-size', '8vh'); // Revert to original font size
   });
 }
 
@@ -58,7 +58,7 @@ function draw() {
   }
   
   // Window styling
-  noStroke
+  noStroke();
   fill('#f7faff'); // off white window color
   
   // Draw windows

@@ -1,4 +1,4 @@
-let ATA;
+let JNTS;
 let windows = []; // Store window data
 let hoveredWindow = null; // Track which window is hovered
 
