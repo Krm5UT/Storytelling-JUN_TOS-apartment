@@ -1,58 +1,64 @@
+
+// ========================= GLOBAL VARIABLES =========================
 let windowImg;
-
-function preload() {
-  windowImg = loadImage(
-    'assets/window.png',
-    () => console.log('window image loaded'),
-    () => console.error('FAILED to load window image')
-  );
-}
-
+let buildingImg;
 let JNTS;
-let windows = []; // Store window data
-let hoveredWindow = null; // Track which window is hovered
-let activeWindows = new Set(); // Track which windows are on (clicked)
+
+// Building dimensions (responsive)
+let buildingWidth;
+let buildingHeight;
+let buildingX;
+let buildingY;
+
+// Windows array and state
+let windows = [];
+let hoveredWindow = null;
+let activeWindows = new Set();
+
+// Door object and animation state
 let door = {
-  w: 280,
-  h: 200,
+  w: 0,
+  h: 0,
   x: 0,
   y: 0,
-  openProgress: 0, // 0 closed, 1 open
+  openProgress: 0,
   openTarget: 0,
   isOpen: false
 };
 
+
+// ========================= PRELOAD =========================
+function preload() {
+  windowImg = loadImage('images/window.png');
+  buildingImg = loadImage('images/OIP.webp');
+}
+
+
+// ========================= SETUP =========================
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight);
   JNTS = select('#JNTS');
-  
-  JNTS.mouseOver(() => {
-    JNTS.style('color', '#7F8CA6'); // Change to a bright color on hover
-    JNTS.style('font-size', '10vh'); // Increase font size on hover
-  });
-
-  JNTS.mouseOut(() => {
-    JNTS.style('color', '#ffffff'); // Revert to original color
-    JNTS.style('font-size', '8vh'); // Revert to original font size
-  });
 }
 
+// ========================= WINDOW RESIZE =========================
 function windowResized() {
   resizeCanvas(window.innerWidth, window.innerHeight);
 }
 
-function draw() {
-  background('#9DA7BB'); // Light blue-gray background
-  
-  //---------------------------- Draw 3 windows rectangles with spacing
+// ========================= HELPER FUNCTIONS =========================
+/**
+ * Draws all windows with fixed sizes, positioned relative to the building
+ */
+function drawWindows() {
+  // Fixed dimensions
   let windowWidth = 150;
   let windowHeight = 200;
-  let spacing = 100; // Space between windows
-  let totalWindowWidth = windowWidth * 3 + spacing * 2; // Total width of all windows
-  let startX = (width - totalWindowWidth) / 2; // Center windows horizontally
-  let startY = height * 0.13; // 20% from top
+  let spacing = 100;
+  let totalWindowWidth = windowWidth * 3 + spacing * 2;
+  let startX = buildingX + (buildingWidth - totalWindowWidth) / 2;
+  let startY = buildingHeight * 0.13;
   
-  // Update windows array
+  // Update windows array with responsive positions
   windows = [
     { x: startX, y: startY, w: windowWidth, h: windowHeight, id: 0 },
     { x: startX + windowWidth + spacing, y: startY, w: windowWidth, h: windowHeight, id: 1 },
@@ -68,98 +74,151 @@ function draw() {
     }
   }
   
-  // Window styling
-  noStroke();
-  fill('#f7faff'); // off white window color
-  
-  // ---Draw windows
+  // Draw window rectangles
   noStroke();
   for (let win of windows) {
-    fill(activeWindows.has(win.id) ? '#fff2b6' : '#f7faff'); // Lighter when active (clicked)
+    fill(activeWindows.has(win.id) ? '#fff2b6' : '#f7faff');
     rect(win.x, win.y, win.w, win.h);
   }
-
-  // ---Draw window images on top
-for (let win of windows) {
-  image(windowImg, win.x, win.y, win.w, win.h);
-};
-
-if (!windowImg) {
-  console.log('windowImg is undefined');
+  
+  // Draw window images on top
+  for (let win of windows) {
+    image(windowImg, win.x, win.y, win.w, win.h);
+  }
 }
 
-
-  //Draw background of double doors to cover gaps when open
-  noStroke();
-  fill('#343e50');
-  rect(door.x, door.y, door.w, door.h);
-
-  //---------------------------- Draw double doors (animated)
+/**
+ * Draws double push/pull doors with animation and fixed size
+ */
+function drawDoors() {
+  // Fixed door dimensions
   door.w = 280;
   door.h = 200;
-  door.x = (width - door.w) / 2; // Center the door horizontally
-  door.y = height * 0.58; // 58% from top
-
-  // animate open/close
+  door.x = buildingX + (buildingWidth - door.w) / 2;
+  door.y = buildingHeight * 0.58;
+  
+  // Animate door open/close
   door.openProgress = lerp(door.openProgress, door.openTarget, 0.18);
   if (abs(door.openProgress - door.openTarget) < 0.01) {
     door.openProgress = door.openTarget;
     door.isOpen = door.openTarget === 1;
   }
-  // open on hover
+  
+  // Check hover and update target
   let doorHover = mouseX > door.x && mouseX < door.x + door.w && mouseY > door.y && mouseY < door.y + door.h;
   door.openTarget = doorHover ? 1 : 0;
-  if (doorHover) cursor('pointer'); else cursor('default');
+  cursor(doorHover ? 'pointer' : 'default');
   
-  // Door styling
-  stroke('#1E1E1E'); // black outline
-  strokeWeight(2);
-  fill('#7F8CA6'); // grey-blueish color for door
-
-  // sliding amount: each door half slides outward by half-width
+  // Calculate opening angle and perspective scaling
+  let maxAngle = 75; // Maximum opening angle in degrees
+  let openAngle = door.openProgress * maxAngle;
+  
   let halfW = door.w / 2;
-  let slide = door.openProgress * (halfW);
-
-  // Draw left door (slides left)
-  rect(door.x - slide, door.y, halfW, door.h);
-
-  // Draw right door (slides right)
-  rect(door.x + halfW + slide, door.y, halfW, door.h);
-
-  // Add inward shadows to doors (slightly inset)
-  stroke('#3D3D3D'); // Darker shadow color
+  
+  // Draw door background (visible when doors open)
+  noStroke();
+  fill('#1f1a19');
+  rect(door.x, door.y, door.w, door.h);
+  
+  // Draw left door (swings inward to the left)
+  push();
+  translate(door.x, door.y);
+  
+  // Create 3D perspective effect
+  let leftScale = cos(radians(openAngle));
+  
+  stroke('#1E1E1E');
+  strokeWeight(2);
+  fill('#615951');
+  
+  // Left door with perspective
+  rect(0, 0, halfW * leftScale, door.h);
+  
+  // Left door shadow
+  let shadowInset = 8;
+  stroke('#3D3D3D');
   strokeWeight(3);
   noFill();
-  rect(door.x - slide + 8, door.y + 8, halfW - 16, door.h - 16);
-  rect(door.x + halfW + slide + 8, door.y + 8, halfW - 16, door.h - 16);
-
-  // Draw door handles (knobs) that move with doors
+  rect(shadowInset, shadowInset, halfW * leftScale - 2 * shadowInset, door.h - 2 * shadowInset);
+  
+  // Left door handle
   fill('#1E1E1E');
   noStroke();
-  rect(door.x - slide + halfW / 3, door.y + door.h / 2, 12, 3); // Left door handle
-  rect(door.x + halfW + slide + (3 * halfW) / 5, door.y + door.h / 2, 12, 3); // Right door handle
-
+  rect((halfW * leftScale) / 3, door.h / 2, 12 * leftScale, 3);
+  
+  pop();
+  
+  // Draw right door (swings inward to the right)
+  push();
+  translate(door.x + door.w, door.y);
+  
+  let rightScale = cos(radians(openAngle));
+  
+  stroke('#1E1E1E');
+  strokeWeight(2);
+  fill('#615951');
+  
+  // Right door with perspective (opens from right side toward center)
+  rect(-halfW * rightScale, 0, halfW * rightScale, door.h);
+  
+  // Right door shadow
+  stroke('#3D3D3D');
+  strokeWeight(3);
+  noFill();
+  rect(-halfW * rightScale + shadowInset, shadowInset, halfW * rightScale - 2 * shadowInset, door.h - 2 * shadowInset);
+  
+  // Right door handle
+  fill('#1E1E1E');
+  noStroke();
+  rect(-halfW * rightScale + (halfW * rightScale) / 3, door.h / 2, 12 * rightScale, 3);
+  
+  pop();
 }
 
+// ========================= DRAW =========================
+function draw() {
+  background('#9DA7BB');
+  
+   
+  
+  // Calculate responsive building dimensions
+  buildingWidth = width * 0.6;
+  buildingX = (width - buildingWidth) / 2;
+  buildingY = 0;
+  buildingHeight = height;
+  
+  // Draw side environments
+  fill('#87a1d3');
+  rect(0, 0, buildingX, height);
+  rect(buildingX + buildingWidth, 0, buildingX, height);
+  
+  // Draw building body with image
+  tint(255, 200);
+  image(buildingImg, buildingX, buildingY, buildingWidth, buildingHeight);
+  noTint();
+  
+  // Draw windows and doors
+  drawWindows();
+  drawDoors();
+}
+
+// ========================= MOUSE INTERACTIONS =========================
 function mousePressed() {
-  // Check if door is clicked (toggle open and navigate after open)
+  // Check if door is clicked
   if (mouseX > door.x && mouseX < door.x + door.w && mouseY > door.y && mouseY < door.y + door.h) {
-    // only navigate when doors are open and user clicks
     if (door.isOpen) {
       window.location.href = 'html/windows.html';
-      return;
     }
-    // if not open, ignore click (hover opens them)
     return;
   }
-
+  
   // Check if a window is clicked
   if (hoveredWindow !== null) {
     if (activeWindows.has(hoveredWindow)) {
-      activeWindows.delete(hoveredWindow); // Turn off window
+      activeWindows.delete(hoveredWindow);
       console.log('Window ' + (hoveredWindow + 1) + ' turned off');
     } else {
-      activeWindows.add(hoveredWindow); // Turn on window
+      activeWindows.add(hoveredWindow);
       console.log('Window ' + (hoveredWindow + 1) + ' turned on');
     }
   }
