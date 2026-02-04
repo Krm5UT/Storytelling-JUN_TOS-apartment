@@ -4,7 +4,7 @@ let roomImg;
 
 function preload() {
   // Load the room image before setup runs
-  oomImg = loadImage('../images/Room.png');
+  roomImg = loadImage('../images/Room.png');
 }
 
 function setup() {
