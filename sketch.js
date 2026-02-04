@@ -1,3 +1,13 @@
+let windowImg;
+
+function preload() {
+  windowImg = loadImage(
+    'assets/window.png',
+    () => console.log('window image loaded'),
+    () => console.error('FAILED to load window image')
+  );
+}
+
 let JNTS;
 let windows = []; // Store window data
 let hoveredWindow = null; // Track which window is hovered
@@ -62,12 +72,22 @@ function draw() {
   noStroke();
   fill('#f7faff'); // off white window color
   
-  // Draw windows
+  // ---Draw windows
   noStroke();
   for (let win of windows) {
     fill(activeWindows.has(win.id) ? '#fff2b6' : '#f7faff'); // Lighter when active (clicked)
     rect(win.x, win.y, win.w, win.h);
   }
+
+  // ---Draw window images on top
+for (let win of windows) {
+  image(windowImg, win.x, win.y, win.w, win.h);
+};
+
+if (!windowImg) {
+  console.log('windowImg is undefined');
+}
+
 
   //Draw background of double doors to cover gaps when open
   noStroke();
