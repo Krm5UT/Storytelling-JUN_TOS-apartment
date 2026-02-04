@@ -90,3 +90,12 @@ function draw() {
     }
   }
 }
+
+function mousePressed() {
+  // Check if second door was clicked
+  let secondDoor = windows[1];
+  if (mouseX > secondDoor.x && mouseX < secondDoor.x + secondDoor.w &&
+      mouseY > secondDoor.y && mouseY < secondDoor.y + secondDoor.h) {
+    window.location.href = 'room.html';
+  }
+}
