@@ -1,10 +1,18 @@
 html, body {
   margin: 0;
   padding: 0;
-  background-color: #9DA7BB;
+  background-image: url('images/new house.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  min-height: 100vh;
 }
 canvas {
   display: block;
+  background: transparent !important;
+  position: relative;
+  z-index: 1;
 }
 
 h1 {
@@ -17,7 +25,7 @@ h1 {
 }
 
 main{
-    background-color: #9DA7BB;
+    background-color: transparent;
     padding: 0;
     margin: 0;
 }

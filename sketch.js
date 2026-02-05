@@ -13,7 +13,6 @@ let buildingY;
 // Windows array and state
 let windows = [];
 let hoveredWindow = null;
-let activeWindows = new Set();
 
 // Door object and animation state
 let door = {
@@ -47,55 +46,72 @@ function windowResized() {
 
 // ========================= HELPER FUNCTIONS =========================
 /**
- * Draws all windows with fixed sizes, positioned relative to the building
+ * Draws single window with fixed size, positioned relative to the building
  */
 function drawWindows() {
-  // Fixed dimensions
-  let windowWidth = 150;
-  let windowHeight = 200;
-  let spacing = 100;
-  let totalWindowWidth = windowWidth * 3 + spacing * 2;
-  let startX = buildingX + (buildingWidth - totalWindowWidth) / 2;
-  let startY = buildingHeight * 0.13;
+  // Responsive window size and position (scales with viewport)
+  let windowWidth = width * 0.11;  // 11% of viewport width
+  let windowHeight = height * 0.28; // 28% of viewport height
+  let startX = width * 0.25;  // 25% from left edge
+  let startY = height * 0.24; // 24% from top
   
-  // Update windows array with responsive positions
+  // Update windows array with responsive position
+  // Preserve curtain animation state if window already exists
+  let oldWindows = windows.length > 0 ? windows : null;
   windows = [
-    { x: startX, y: startY, w: windowWidth, h: windowHeight, id: 0 },
-    { x: startX + windowWidth + spacing, y: startY, w: windowWidth, h: windowHeight, id: 1 },
-    { x: startX + 2 * (windowWidth + spacing), y: startY, w: windowWidth, h: windowHeight, id: 2 }
+    { x: startX, y: startY, w: windowWidth, h: windowHeight, id: 0, curtainProgress: 0, curtainTarget: 0, isClosed: false }
   ];
   
-  // Check for hover
+  // Restore curtain animation state after position update
+  if (oldWindows && oldWindows.length > 0) {
+    windows[0].curtainProgress = oldWindows[0].curtainProgress;
+    windows[0].curtainTarget = oldWindows[0].curtainTarget;
+    windows[0].isClosed = oldWindows[0].isClosed;
+  }
+  
+  // Check for hover and update curtain target
   hoveredWindow = null;
-  for (let win of windows) {
-    if (mouseX > win.x && mouseX < win.x + win.w && mouseY > win.y && mouseY < win.y + win.h) {
-      hoveredWindow = win.id;
-      break;
+  let win = windows[0];
+  if (mouseX > win.x && mouseX < win.x + win.w && mouseY > win.y && mouseY < win.y + win.h) {
+    hoveredWindow = win.id;
+    if (!win.isClosed) {
+      win.curtainTarget = 1; // Close curtains on hover if not locked
+    }
+  } else {
+    if (!win.isClosed) {
+      win.curtainTarget = 0; // Open curtains when not hovering if not locked
     }
   }
   
-  // Draw window rectangles
-  noStroke();
-  for (let win of windows) {
-    fill(activeWindows.has(win.id) ? '#fff2b6' : '#f7faff');
-    rect(win.x, win.y, win.w, win.h);
+  // If window is clicked closed, keep curtains closed
+  if (win.isClosed) {
+    win.curtainTarget = 1;
   }
   
-  // Draw window images on top
-  for (let win of windows) {
-    image(windowImg, win.x, win.y, win.w, win.h);
-  }
+  // Animate curtains with smooth lerp
+  win.curtainProgress = lerp(win.curtainProgress, win.curtainTarget, 0.15);
+  
+  // Draw window rectangle
+  noStroke();
+  fill('#f7faff');
+  rect(win.x, win.y, win.w, win.h);
+  
+  // Draw curtains (between window fill and frame)
+  drawCurtains(win.x, win.y, win.w, win.h, win.curtainProgress);
+  
+  // Draw window image on top
+  image(windowImg, win.x, win.y, win.w, win.h);
 }
 
 /**
- * Draws double push/pull doors with animation and fixed size
+ * Draws single door with animation and fixed size
  */
 function drawDoors() {
-  // Fixed door dimensions
-  door.w = 280;
-  door.h = 200;
-  door.x = buildingX + (buildingWidth - door.w) / 2;
-  door.y = buildingHeight * 0.58;
+  // Responsive door size and position (scales with viewport)
+  door.w = width * 0.10;  // 10% of viewport width
+  door.h = height * 0.28; // 28% of viewport height
+  door.x = width * 0.25;  // 25% from left edge
+  door.y = height * 0.62; // 62% from top
   
   // Animate door open/close
   door.openProgress = lerp(door.openProgress, door.openTarget, 0.18);
@@ -113,72 +129,94 @@ function drawDoors() {
   let maxAngle = 75; // Maximum opening angle in degrees
   let openAngle = door.openProgress * maxAngle;
   
-  let halfW = door.w / 2;
-  
-  // Draw door background (visible when doors open)
+  // Draw door background (visible when door opens)
   noStroke();
   fill('#1f1a19');
   rect(door.x, door.y, door.w, door.h);
   
-  // Draw left door (swings inward to the left)
+  // Draw single door (swings inward to the left)
   push();
   translate(door.x, door.y);
   
   // Create 3D perspective effect
-  let leftScale = cos(radians(openAngle));
+  let doorScale = cos(radians(openAngle));
   
   stroke('#1E1E1E');
   strokeWeight(2);
   fill('#615951');
   
-  // Left door with perspective
-  rect(0, 0, halfW * leftScale, door.h);
+  // Door with perspective
+  rect(0, 0, door.w * doorScale, door.h);
   
-  // Left door shadow
+  // Door shadow
   let shadowInset = 8;
   stroke('#3D3D3D');
   strokeWeight(3);
   noFill();
-  rect(shadowInset, shadowInset, halfW * leftScale - 2 * shadowInset, door.h - 2 * shadowInset);
+  rect(shadowInset, shadowInset, door.w * doorScale - 2 * shadowInset, door.h - 2 * shadowInset);
   
-  // Left door handle
+  // Door handle
   fill('#1E1E1E');
   noStroke();
-  rect((halfW * leftScale) / 3, door.h / 2, 12 * leftScale, 3);
-  
-  pop();
-  
-  // Draw right door (swings inward to the right)
-  push();
-  translate(door.x + door.w, door.y);
-  
-  let rightScale = cos(radians(openAngle));
-  
-  stroke('#1E1E1E');
-  strokeWeight(2);
-  fill('#615951');
-  
-  // Right door with perspective (opens from right side toward center)
-  rect(-halfW * rightScale, 0, halfW * rightScale, door.h);
-  
-  // Right door shadow
-  stroke('#3D3D3D');
-  strokeWeight(3);
-  noFill();
-  rect(-halfW * rightScale + shadowInset, shadowInset, halfW * rightScale - 2 * shadowInset, door.h - 2 * shadowInset);
-  
-  // Right door handle
-  fill('#1E1E1E');
-  noStroke();
-  rect(-halfW * rightScale + (halfW * rightScale) / 3, door.h / 2, 12 * rightScale, 3);
+  rect((door.w * doorScale) / 3, door.h / 2, 12 * doorScale, 3);
   
   pop();
 }
 
+/**
+ * Draws animated curtains that close from both sides
+ * @param {number} x - X position of window
+ * @param {number} y - Y position of window
+ * @param {number} w - Width of window
+ * @param {number} h - Height of window
+ * @param {number} progress - Animation progress (0 = open, 1 = closed)
+ */
+function drawCurtains(x, y, w, h, progress) {
+  if (progress < 0.01) return; // Don't draw if curtains are fully open
+  
+  // Curtain width based on progress (each curtain covers half the window)
+  let curtainWidth = (w / 2) * progress;
+  
+  // Curtain rod at top
+  fill('#3d2b2b');
+  noStroke();
+  rect(x, y, w, 8);
+  
+  // Left curtain
+  fill('#7a521a');
+  rect(x, y + 8, curtainWidth, h - 8);
+  
+  // Left curtain shadow/fold detail
+  stroke('#5a330f');
+  strokeWeight(2);
+  for (let i = 1; i < 4; i++) {
+    let foldX = x + (curtainWidth / 4) * i;
+    line(foldX, y + 8, foldX, y + h);
+  }
+  
+  // Right curtain
+  noStroke();
+  fill('#7a521a');
+  rect(x + w - curtainWidth, y + 8, curtainWidth, h - 8);
+  
+  // Right curtain shadow/fold detail
+  stroke('#5a330f');
+  strokeWeight(2);
+  for (let i = 1; i < 4; i++) {
+    let foldX = x + w - curtainWidth + (curtainWidth / 4) * i;
+    line(foldX, y + 8, foldX, y + h);
+  }
+  
+  // Curtain edge highlights for depth
+  stroke('#9a3a3a');
+  strokeWeight(1);
+  line(x + curtainWidth - 1, y + 8, x + curtainWidth - 1, y + h);
+  line(x + w - curtainWidth + 1, y + 8, x + w - curtainWidth + 1, y + h);
+}
+
 // ========================= DRAW =========================
 function draw() {
-  background('#9DA7BB');
-  
+  clear(); // Clear canvas to show background image
    
   // Calculate responsive building dimensions
   buildingWidth = width * 0.6;
@@ -186,15 +224,6 @@ function draw() {
   buildingY = 0;
   buildingHeight = height;
   
-  // Draw side environments
-  fill('#87a1d3');
-  rect(0, 0, buildingX, height);
-  rect(buildingX + buildingWidth, 0, buildingX, height);
-  
-  // Draw building body with image
-  tint(200, 205); // Slight transparency
-  image(buildingImg, buildingX, buildingY, buildingWidth, buildingHeight);
-  noTint();
   
   // Draw windows and doors
   drawWindows();
@@ -211,14 +240,9 @@ function mousePressed() {
     return;
   }
   
-  // Check if a window is clicked
+  // Check if a window is clicked - lock curtains closed
   if (hoveredWindow !== null) {
-    if (activeWindows.has(hoveredWindow)) {
-      activeWindows.delete(hoveredWindow);
-      console.log('Window ' + (hoveredWindow + 1) + ' turned off');
-    } else {
-      activeWindows.add(hoveredWindow);
-      console.log('Window ' + (hoveredWindow + 1) + ' turned on');
-    }
+    windows[hoveredWindow].isClosed = true;
+    windows[hoveredWindow].curtainTarget = 1;
   }
 }
