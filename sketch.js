@@ -140,10 +140,8 @@ function drawDoors() {
   let doorHover = mouseX > door.x && mouseX < door.x + door.w && mouseY > door.y && mouseY < door.y + door.h;
   if (doorClickCount >= 3) {
     door.openTarget = doorHover ? 1 : 0;
-    cursor(doorHover ? 'pointer' : 'default');
   } else {
     door.openTarget = 0;
-    cursor('default');
   }
   
   // Calculate opening angle and perspective scaling
@@ -249,6 +247,12 @@ function draw() {
   // Draw windows and doors
   drawWindows();
   drawDoors();
+  
+  // Set cursor based on hover states
+  let doorHover = mouseX > door.x && mouseX < door.x + door.w && mouseY > door.y && mouseY < door.y + door.h;
+  let windowHover = hoveredWindow !== null;
+  
+  cursor((doorHover || windowHover) ? 'pointer' : 'default');
 }
 
 // ========================= MOUSE INTERACTIONS =========================
