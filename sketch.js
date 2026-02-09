@@ -49,11 +49,11 @@ function windowResized() {
  * Draws single window with fixed size, positioned relative to the building
  */
 function drawWindows() {
-  // Responsive window size and position (scales with viewport)
-  let windowWidth = width * 0.11;  // 11% of viewport width
-  let windowHeight = height * 0.28; // 28% of viewport height
-  let startX = width * 0.25;  // 25% from left edge
-  let startY = height * 0.24; // 24% from top
+  // Fixed window size and position
+  let windowWidth = 160;
+  let windowHeight = 230;
+  let startX = width * 0.58;  // Positioned next to the door with spacing
+  let startY = height * 0.50; // Aligned with the door vertically
   
   // Update windows array with responsive position
   // Preserve curtain animation state if window already exists
@@ -107,11 +107,11 @@ function drawWindows() {
  * Draws single door with animation and fixed size
  */
 function drawDoors() {
-  // Responsive door size and position (scales with viewport)
-  door.w = width * 0.10;  // 10% of viewport width
-  door.h = height * 0.28; // 28% of viewport height
-  door.x = width * 0.25;  // 25% from left edge
-  door.y = height * 0.62; // 62% from top
+  // Fixed door size and position
+  door.w = 140;
+  door.h = 250;
+  door.x = width * 0.30;  // 25% from left edge
+  door.y = height * 0.61; // 60% from top
   
   // Animate door open/close
   door.openProgress = lerp(door.openProgress, door.openTarget, 0.18);
