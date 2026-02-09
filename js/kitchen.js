@@ -119,5 +119,9 @@ function mousePressed() {
       boyX = (width - boyWidth) / 2;
       boyY = height - boyHeight - 50;
     }
+    // Fourth click: navigate to ending
+    else if (boyClickCount >= 4) {
+      window.location.href = 'ending.html';
+    }
   }
 }
