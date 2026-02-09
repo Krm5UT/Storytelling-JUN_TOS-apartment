@@ -1,10 +1,10 @@
 // Room functionality for Storytelling Website
 
-let roomImg;
+let livingroomImg;
 
 function preload() {
   // Load the room image before setup runs
-  roomImg = loadImage('../images/Room.png');
+  livingroomImg = loadImage('../images/living room.jpg');
 }
 
 function setup() {
@@ -19,7 +19,7 @@ function draw() {
   background(220);
   
   // Calculate aspect ratios
-  let imgAspect = roomImg.width / roomImg.height;
+  let imgAspect = livingroomImg.width / livingroomImg.height;
   let canvasAspect = width / height;
   
   let drawWidth, drawHeight, drawX, drawY;
@@ -40,5 +40,5 @@ function draw() {
   }
   
   // Display the room image centered and scaled
-  image(roomImg, drawX, drawY, drawWidth, drawHeight);
+  image(livingroomImg, drawX, drawY, drawWidth, drawHeight);
 }

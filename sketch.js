@@ -4,6 +4,11 @@ let windowImg;
 let buildingImg;
 let JNTS;
 
+// Sound effects
+let knockSound;
+let curtainSound;
+let curtainSoundPlaying = false;
+
 // Building dimensions (responsive)
 let buildingWidth;
 let buildingHeight;
@@ -25,11 +30,16 @@ let door = {
   isOpen: false
 };
 
+// Door click counter
+let doorClickCount = 0;
+
 
 // ========================= PRELOAD =========================
 function preload() {
   windowImg = loadImage('images/window.png');
   buildingImg = loadImage('images/OIP.webp');
+  knockSound = loadSound('Sound effects/Knock On Wooden Door_01.mp3');
+  curtainSound = loadSound('Sound effects/CurtainClose.mp3');
 }
 
 
@@ -76,11 +86,17 @@ function drawWindows() {
     hoveredWindow = win.id;
     if (!win.isClosed) {
       win.curtainTarget = 1; // Close curtains on hover if not locked
+      // Play curtain sound on hover start
+      if (!curtainSoundPlaying) {
+        curtainSound.play();
+        curtainSoundPlaying = true;
+      }
     }
   } else {
     if (!win.isClosed) {
       win.curtainTarget = 0; // Open curtains when not hovering if not locked
     }
+    curtainSoundPlaying = false; // Reset sound flag when not hovering
   }
   
   // If window is clicked closed, keep curtains closed
@@ -120,10 +136,15 @@ function drawDoors() {
     door.isOpen = door.openTarget === 1;
   }
   
-  // Check hover and update target
+  // Check hover and update target (only after 3rd click)
   let doorHover = mouseX > door.x && mouseX < door.x + door.w && mouseY > door.y && mouseY < door.y + door.h;
-  door.openTarget = doorHover ? 1 : 0;
-  cursor(doorHover ? 'pointer' : 'default');
+  if (doorClickCount >= 3) {
+    door.openTarget = doorHover ? 1 : 0;
+    cursor(doorHover ? 'pointer' : 'default');
+  } else {
+    door.openTarget = 0;
+    cursor('default');
+  }
   
   // Calculate opening angle and perspective scaling
   let maxAngle = 75; // Maximum opening angle in degrees
@@ -158,7 +179,7 @@ function drawDoors() {
   // Door handle
   fill('#1E1E1E');
   noStroke();
-  rect((door.w * doorScale) / 3, door.h / 2, 12 * doorScale, 3);
+  rect((door.w * doorScale) / 3, door.h / 2, 15 * doorScale, 3);
   
   pop();
 }
@@ -234,8 +255,10 @@ function draw() {
 function mousePressed() {
   // Check if door is clicked
   if (mouseX > door.x && mouseX < door.x + door.w && mouseY > door.y && mouseY < door.y + door.h) {
-    if (door.isOpen) {
-      window.location.href = 'html/windows.html';
+    knockSound.play(); // Play knock sound
+    doorClickCount++;
+    if (door.isOpen && doorClickCount >= 3) {
+      window.location.href = 'html/room.html';
     }
     return;
   }
