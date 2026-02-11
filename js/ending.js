@@ -3,9 +3,7 @@
 let outsideHouseImg;
 let textIndex = 0;
 let messages = [
-  "Congrats you just earned your bonus!",
-  "A loving and hardworking father has now been seperated from his family.",
-  "Don't forget to also detain the child before you leave, who knows maybe you'll get paid more"
+  "Congrats you just earned your bonus!"
 ];
 
 function preload() {
