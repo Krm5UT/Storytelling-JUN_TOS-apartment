@@ -6,7 +6,7 @@ let currentBoyImg;
 let boyClickCount = 0;
 
 // Boy size and position (adjust boyBaseHeight to change size)
-let boyBaseHeight = 300; // Adjust this value to change boy size
+let boyBaseHeight = 450; // Adjust this value to change boy size
 let boyHappyWidth, boyHappyHeight;
 let boyWorriedWidth, boyWorriedHeight;
 let boySadWidth, boySadHeight;
@@ -18,9 +18,9 @@ let boyY = 0;
 function preload() {
   // Load the room image before setup runs
   kitchenImg = loadImage('../images/kitchen.jpg');
-  boyHappyImg = loadImage('../images/boy.happy.png');
-  boyWorriedImg = loadImage('../images/boy.worried.png');
-  boySadImg = loadImage('../images/boy.sad.png');
+  boyHappyImg = loadImage('../images/pixil-gif-drawing.gif');
+  boyWorriedImg = loadImage('../images/pixil-frame-1.png');
+  boySadImg = loadImage('../images/pixil-frame-2.png');
 }
 
 function setup() {
@@ -46,7 +46,7 @@ function setup() {
   
   // Position boy (centered horizontally, bottom of screen)
   boyX = (width - boyWidth) / 2;
-  boyY = height - boyHeight - 50;
+  boyY = height - boyHeight + 10;
 }
 
 function windowResized() {
@@ -54,7 +54,7 @@ function windowResized() {
   
   // Reposition boy when window resizes
   boyX = (width - boyWidth) / 2;
-  boyY = height - boyHeight - 50;
+  boyY = height - boyHeight + 10;
 }
 
 function draw() {
@@ -108,7 +108,7 @@ function mousePressed() {
       boyHeight = boyWorriedHeight;
       // Recenter after size change
       boyX = (width - boyWidth) / 2;
-      boyY = height - boyHeight - 50;
+      boyY = height - boyHeight + 10;
     }
     // Second click: change to sad
     else if (boyClickCount === 2) {
@@ -117,7 +117,7 @@ function mousePressed() {
       boyHeight = boySadHeight;
       // Recenter after size change
       boyX = (width - boyWidth) / 2;
-      boyY = height - boyHeight - 50;
+      boyY = height - boyHeight + 10;
     }
     // Fourth click: navigate to ending
     else if (boyClickCount >= 4) {
