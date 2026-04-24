@@ -59,9 +59,9 @@ function draw() {
 
   // ── Click prompt (visible after box is dismissed) ─────────────
   if (textIndex >= messages.length) {
-    fill(255, 255, 255, 150);
+    fill(255, 0, 0, 150);
     noStroke();
-    textSize(16);
+    textSize(25);
     textAlign(CENTER, CENTER);
     text('click to continue...', width / 2, height - 40);
   }
