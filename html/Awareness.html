@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Awareness</title>
+    <link rel="stylesheet" type="text/css" href="../style.css">
+    <style>
+      body.awareness-page {
+        background-color: #000;
+        background-image: none;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+      }
+
+      #credits {
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        width: min(720px, 90vw);
+        top: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 48px;
+        padding-bottom: 120px;
+      }
+
+      .credits-title {
+        font-family: 'Georgia', serif;
+        font-size: clamp(1.4rem, 3vw, 2rem);
+        font-weight: bold;
+        color: #fff;
+        text-align: center;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        text-shadow:
+          0 0 18px rgba(255,255,255,0.9),
+          0 0 40px rgba(255,255,255,0.4);
+        margin-bottom: 8px;
+      }
+
+      .credits-body {
+        font-family: 'Georgia', serif;
+        font-size: clamp(1rem, 2.2vw, 1.25rem);
+        color: #e8e8e8;
+        text-align: center;
+        line-height: 1.9;
+        letter-spacing: 0.03em;
+        text-shadow:
+          0 0 12px rgba(255,255,255,0.6),
+          0 0 30px rgba(255,255,255,0.2);
+        max-width: 640px;
+      }
+
+      .divider {
+        width: 120px;
+        height: 1px;
+        background: linear-gradient(to right, transparent, rgba(255,255,255,0.5), transparent);
+      }
+
+      .video-wrapper {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .video-wrapper video {
+        width: 100%;
+        max-width: 680px;
+        border-radius: 6px;
+        box-shadow:
+          0 0 30px rgba(255,255,255,0.15),
+          0 0 80px rgba(255,255,255,0.05);
+        outline: 1px solid rgba(255,255,255,0.1);
+      }
+
+      .video-caption {
+        font-family: 'Georgia', serif;
+        font-size: 0.85rem;
+        color: rgba(255,255,255,0.45);
+        text-align: center;
+        letter-spacing: 0.06em;
+        font-style: italic;
+      }
+
+      #top-fade {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        height: 140px;
+        background: linear-gradient(to bottom, #000 40%, transparent);
+        z-index: 10;
+        pointer-events: none;
+      }
+      #bottom-fade {
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        height: 140px;
+        background: linear-gradient(to top, #000 40%, transparent);
+        z-index: 10;
+        pointer-events: none;
+      }
+
+      /* Continue hint shown after scroll stops */
+      #continue-hint {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: rgba(255, 255, 255, 0.45);
+        font-family: 'Georgia', serif;
+        font-size: 0.85rem;
+        letter-spacing: 0.08em;
+        font-style: italic;
+        opacity: 0;
+        transition: opacity 1s ease;
+        z-index: 20;
+        pointer-events: none;
+      }
+      #continue-hint.visible { opacity: 1; }
+    </style>
+  </head>
+
+  <body class="awareness-page">
+    <div id="top-fade"></div>
+    <div id="bottom-fade"></div>
+    <div id="continue-hint">scroll to continue</div>
+
+    <div id="credits">
+      <div class="credits-title">A Message of Awareness</div>
+      <div class="divider"></div>
+
+      <p class="credits-body">
+        The Trump administration has passed several efforts that support financially
+        the ICE department. This causes ICE to act aggressively in order for their own benefit.
+      </p>
+
+      <div class="divider"></div>
+
+      <!-- ── Video stop marker — scroll halts when this hits center screen ── -->
+      <div id="video-stop-marker"></div>
+
+      <div class="video-wrapper">
+        <video controls>
+          <source src="../videos/CallCenter.mp4" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+        <span class="video-caption">Call Center</span>
+      </div>
+
+      <div class="video-wrapper">
+        <video controls>
+          <source src="../videos/AbrilAldama.mp4" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+        <span class="video-caption">Abril Aldama</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <p class="credits-body" style="font-size:0.95rem; color: rgba(255,255,255,0.5);">
+        Stay informed. Stay aware.
+      </p>
+    </div>
+
+    <script>
+      const credits = document.getElementById('credits');
+      const marker  = document.getElementById('video-stop-marker');
+      const hint    = document.getElementById('continue-hint');
+
+      // Scroll speed in px per frame (increase = faster)
+      const SPEED = 0.6;
+
+      // How far from the top of the screen the marker should stop (px)
+      const STOP_OFFSET = 10;
+
+      let currentTop   = window.innerHeight; // starts below screen
+      let stopped      = false;
+      let stopPosition = null;               // calculated once layout settles
+
+      function getStopPosition() {
+        // Position where the marker should rest on screen
+        // = current credits top + marker's offsetTop - STOP_OFFSET
+        return -(marker.offsetTop - STOP_OFFSET);
+      }
+
+      function tick() {
+        if (!stopped) {
+          currentTop -= SPEED;
+
+          // Calculate stop position lazily (after layout is ready)
+          if (stopPosition === null && marker.offsetTop > 0) {
+            stopPosition = getStopPosition();
+          }
+
+          // Stop when the video marker reaches the target position
+          if (stopPosition !== null && currentTop <= stopPosition) {
+            currentTop = stopPosition;
+            stopped    = true;
+            hint.classList.add('visible');
+          }
+
+          credits.style.top = currentTop + 'px';
+        }
+
+        requestAnimationFrame(tick);
+      }
+
+      // Allow manual scrolling after auto-scroll stops
+      window.addEventListener('wheel', (e) => {
+        if (!stopped) return;
+        currentTop -= e.deltaY * 0.5;
+        credits.style.top = currentTop + 'px';
+        hint.classList.remove('visible');
+      });
+
+      // Touch swipe support
+      let touchStartY = 0;
+      window.addEventListener('touchstart', (e) => { touchStartY = e.touches[0].clientY; });
+      window.addEventListener('touchmove', (e) => {
+        if (!stopped) return;
+        let delta = touchStartY - e.touches[0].clientY;
+        currentTop -= delta * 0.8;
+        touchStartY = e.touches[0].clientY;
+        credits.style.top = currentTop + 'px';
+        hint.classList.remove('visible');
+      });
+
+      requestAnimationFrame(tick);
+    </script>
+  </body>
+</html>

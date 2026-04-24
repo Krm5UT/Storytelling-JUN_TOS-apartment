@@ -1,13 +1,46 @@
-html, body {
+/* ── Reset ────────────────────────────────────────────────────── */
+*, *::before, *::after {
   margin: 0;
   padding: 0;
-  background-image: url('images/new house.jpg');
+  box-sizing: border-box;
+}
+
+/* ── Base (all pages) ────────────────────────────────────────── */
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  min-height: 100vh;
+  background-color: #ab814d; /* safe fallback for all pages */
+  background-image: none;    /* no image by default */
+}
+
+/* ── Index/Home page only (body has no class) ────────────────── */
+body:not([class]) {
+  background-image: url('../images/new house.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
-  min-height: 100vh;
+  background-color: #b68344;
 }
+
+/* ── Room page ───────────────────────────────────────────────── */
+body.room-page {
+  background-color: #c8a882;
+}
+
+/* ── Kitchen page ────────────────────────────────────────────── */
+body.kitchen-page {
+  background-color: #c8a882;
+}
+
+/* ── Ending page ─────────────────────────────────────────────── */
+body.ending-page {
+  background-color: #1a1a1a;
+}
+
+/* ── Canvas ──────────────────────────────────────────────────── */
 canvas {
   display: block;
   background: transparent !important;
@@ -15,6 +48,17 @@ canvas {
   z-index: 1;
 }
 
+/* ── Swipe transition (all pages except index) ───────────────── */
+body[class] {
+  animation: swipeIn 0.45s ease-out both;
+}
+
+@keyframes swipeIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0%);   opacity: 1; }
+}
+
+/* ── Other styles ────────────────────────────────────────────── */
 h1 {
   text-align: center;
   color: white;
@@ -24,9 +68,8 @@ h1 {
   font-size: 9vh;
 }
 
-main{
-    background-color: transparent;
-    padding: 0;
-    margin: 0;
+main {
+  background-color: transparent;
+  padding: 0;
+  margin: 0;
 }
-

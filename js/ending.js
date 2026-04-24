@@ -7,7 +7,6 @@ let messages = [
 ];
 
 function preload() {
-  // Load the outside house image
   outsideHouseImg = loadImage('../images/outsidehouse.jpg');
 }
 
@@ -21,57 +20,59 @@ function windowResized() {
 
 function draw() {
   background(220);
-  
-  // Calculate aspect ratios
-  let imgAspect = outsideHouseImg.width / outsideHouseImg.height;
+
+  let imgAspect    = outsideHouseImg.width / outsideHouseImg.height;
   let canvasAspect = width / height;
-  
   let drawWidth, drawHeight, drawX, drawY;
-  
-  // Cover the entire canvas (like CSS background-size: cover)
+
   if (canvasAspect > imgAspect) {
-    // Canvas is wider than image
-    drawWidth = width;
+    drawWidth  = width;
     drawHeight = width / imgAspect;
     drawX = 0;
     drawY = (height - drawHeight) / 2;
   } else {
-    // Canvas is taller than image
-    drawWidth = height * imgAspect;
+    drawWidth  = height * imgAspect;
     drawHeight = height;
     drawX = (width - drawWidth) / 2;
     drawY = 0;
   }
-  
-  // Display the outside house image centered and scaled
+
   image(outsideHouseImg, drawX, drawY, drawWidth, drawHeight);
-  
-  // Draw text box only if there are messages left to show
+
+  // ── Text box (visible while messages remain) ──────────────────
   if (textIndex < messages.length) {
-    // Draw semi-transparent background box
-    let boxWidth = width * 0.7;
+    let boxWidth  = width * 0.7;
     let boxHeight = 150;
-    let boxX = (width - boxWidth) / 2;
-    let boxY = (height - boxHeight) / 2;
-    
-    fill(0, 0, 0, 180); // Black with transparency
-    rect(boxX, boxY, boxWidth, boxHeight, 10); // Rounded corners
-    
-    // Draw text
-    fill(255); // White text
+    let boxX      = (width  - boxWidth)  / 2;
+    let boxY      = (height - boxHeight) / 2;
+
+    noStroke();
+    fill(0, 0, 0, 180);
+    rect(boxX, boxY, boxWidth, boxHeight, 10);
+
+    fill(255);
     textAlign(CENTER, CENTER);
     textSize(24);
     textWrap(WORD);
     text(messages[textIndex], boxX + 20, boxY + 20, boxWidth - 40, boxHeight - 40);
   }
+
+  // ── Click prompt (visible after box is dismissed) ─────────────
+  if (textIndex >= messages.length) {
+    fill(255, 255, 255, 150);
+    noStroke();
+    textSize(16);
+    textAlign(CENTER, CENTER);
+    text('click to continue...', width / 2, height - 40);
+  }
 }
 
 function mousePressed() {
-  // Advance to next message
   if (textIndex < messages.length - 1) {
-    textIndex++;
+    textIndex++;                              // advance messages
+  } else if (textIndex === messages.length - 1) {
+    textIndex++;                              // hides the box, shows prompt
   } else {
-    // Optional: hide box after last message
-    textIndex++; // This will make textIndex >= messages.length, hiding the box
+    window.location.href = '../html/awareness.html'; // go to awareness page
   }
 }
