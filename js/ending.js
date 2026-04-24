@@ -73,6 +73,6 @@ function mousePressed() {
   } else if (textIndex === messages.length - 1) {
     textIndex++;                              // hides the box, shows prompt
   } else {
-    window.location.href = '../html/awareness.html'; // go to awareness page
+    window.location.href = '../html/Awareness.html'; // go to awareness page
   }
 }

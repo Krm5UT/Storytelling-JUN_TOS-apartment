@@ -11,18 +11,19 @@ html, body {
   height: 100%;
   overflow: hidden;
   min-height: 100vh;
-  background-color: #ab814d; /* safe fallback for all pages */
-  background-image: none;    /* no image by default */
+  background-color: #a8bfd4;
+  background-image: none;
 }
 
-/* ── Index/Home page only (body has no class) ────────────────── */
+/* ── Index/Home page — body has no class ─────────────────────── */
+/* index.html is at ROOT so path has no ../ */
 body:not([class]) {
-  background-image: url('../images/new house.jpg');
+  background-image: url('images/new house.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
-  background-color: #b68344;
+  background-color: #a8bfd4;
 }
 
 /* ── Room page ───────────────────────────────────────────────── */
@@ -40,6 +41,12 @@ body.ending-page {
   background-color: #1a1a1a;
 }
 
+/* ── Awareness page ──────────────────────────────────────────── */
+body.awareness-page {
+  background-color: #000;
+  background-image: none;
+}
+
 /* ── Canvas ──────────────────────────────────────────────────── */
 canvas {
   display: block;
@@ -48,7 +55,7 @@ canvas {
   z-index: 1;
 }
 
-/* ── Swipe transition (all pages except index) ───────────────── */
+/* ── Swipe transition (inner pages only) ─────────────────────── */
 body[class] {
   animation: swipeIn 0.45s ease-out both;
 }
